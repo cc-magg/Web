@@ -1,17 +1,25 @@
 'use strict'
 
+const asyncify = require('express-asyncify')
 const express = require('express')
 const http = require('http')
-const api = require('./api')
+//const api = require('./api')
 
-const app = express()
+const app = asyncify(express())
 
 const chalk = require('chalk')
 const debug = require('debug')('API-server')
 
+const next = require('next')
+const dev = process.env.NODE_ENV !== 'production'
+const nextApp = next({ dev })
+const nextHandler = nextApp.getRequestHandler()
+
 // settings
 const port = process.env.PORT || 3000
-app.use(api)
+nextApp.prepare().then(() => {
+//app.use('/', api)
+app.get('*', (req, res) => nextHandler(req, res))
 
 /* MANEJO DE ERRORES */
 app.use((err, req, res, next) => {
@@ -29,3 +37,8 @@ if (!module.parent) {
     console.log(`${chalk.green('[ERP-api]')} server ready and listening on port ${port}`)
   })
 }
+}).catch(err => {
+  console.error(err.message)
+  console.error(err.stack)
+  process.exit(1)
+})

@@ -1,21 +1,79 @@
 {
-  "name": "api",
-  "version": "1.0.0",
-  "description": "api",
+  "name": "nextjs",
+  "version": "0.0.1",
+  "description": "this is a nextjs tutorial",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "lint": "standard"
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "test": "jest",
+    "node": "nodemon server.js"
   },
-  "author": "C GG",
-  "license": "ISC",
-  "dependencies": {
-    "chalk": "^2.4.2",
-    "debug": "^4.1.1",
-    "express": "^4.16.4"
+  "author": "carlos maximiliano galvan grajales",
+  "license": "MIT",
+  "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/setup.js"
+    ],
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
+    "moduleNameMapper": {
+      "^.+\\.(css|scss)$": "identity-obj-proxy"
+    }
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-proposal-decorators": "^7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.4.0",
+    "@babel/preset-env": "^7.4.1",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-stage-0": "^7.0.0",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^24.5.0",
+    "babel-loader": "^8.0.5",
+    "babel-plugin-react-require": "^3.1.1",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "chalk": "^2.4.2",
+    "debug": "^4.1.1",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.11.2",
+    "enzyme-to-json": "^3.3.5",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^24.5.0",
+    "jest-cli": "^24.5.0",
     "nodemon": "^1.18.10",
-    "standard": "^12.0.1"
+    "react-addons-test-utils": "^15.6.2",
+    "react-test-renderer": "^16.8.4",
+    "redux-mock-store": "^1.5.3",
+    "regenerator-runtime": "^0.13.1",
+    "sinon": "^7.3.0"
+  },
+  "dependencies": {
+    "@babel/runtime-corejs2": "^7.4.0",
+    "acorn": "^6.1.1",
+    "axios": "^0.18.0",
+    "express": "^4.16.4",
+    "express-asyncify": "^1.0.0",
+    "immutable": "^4.0.0-rc.12",
+    "next": "^8.0.3",
+    "next-redux-saga": "^4.0.1",
+    "next-redux-wrapper": "^3.0.0-alpha.2",
+    "preact": "^8.4.2",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-redux": "^6.0.1",
+    "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-immutable": "^4.0.0",
+    "redux-logger": "^3.0.6",
+    "redux-saga": "^1.0.2",
+    "redux-thunk": "^2.3.0"
   }
 }
