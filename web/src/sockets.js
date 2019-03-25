@@ -1,6 +1,6 @@
 'use strict'
 const Chat = require('./models/Chat')
-const ObjectId = require("mongoose").Types.ObjectId
+const ObjectId = require('mongoose').Types.ObjectId
 let users = []
 this._userId = null
 
@@ -14,7 +14,7 @@ module.exports = function (io) {
 
     socket.on('new user', function (userId) { // no va a entrar aca a menos que actualicemos el cliente, si reiniciamos el servidor solo reinicia las variables mas no se pierde la conexion con los clientes anteriores
       users.push(userId)
-      console.log('newwwwww user: '+users)
+      console.log('newwwwww user: ' + users)
       this._userId = userId
       io.sockets.emit('new user connected', userId)
     })
@@ -41,12 +41,12 @@ module.exports = function (io) {
       io.sockets.emit('load More messages', newData)
     })
     socket.on('disconnect', function (data) {
-      console.log(users+'--usuario desconectado: '+this._userId)
-      //if (this._userId === null || this._userId === undefined) { // ocurre en caso de que se reinicie el servidor y algun cliente sigue conectado desde antes de que callera hasta que vuelve a prender, en ese caso el this._userId estaria vacio ya que primero se desconecta al usuario antiguo antes de conectar a el otro usuario sobre le mismo cliente
+      console.log(users + '--usuario desconectado: ' + this._userId)
+      // if (this._userId === null || this._userId === undefined) { // ocurre en caso de que se reinicie el servidor y algun cliente sigue conectado desde antes de que callera hasta que vuelve a prender, en ese caso el this._userId estaria vacio ya que primero se desconecta al usuario antiguo antes de conectar a el otro usuario sobre le mismo cliente
       const index = users.indexOf(this._userId)
       users.splice(index, 1)
       console.log(users)
-      //}
+      // }
       io.sockets.emit('user disconnected', users)
     })
   })
@@ -55,7 +55,7 @@ module.exports = function (io) {
 async function GettingMesages (messageId) {
   let messages = await Chat.find({ _id: {$lte: ObjectId(messageId)} }).sort({ created_at: -1 }).limit(7) // more here: https://stackoverflow.com/questions/21947625/return-range-of-documents-around-id-in-mongodb
   let newMessage = []
-  for(let i = 0; i < messages.length; i++) {
+  for (let i = 0; i < messages.length; i++) {
     newMessage.push(messages[i])
   }
   newMessage.shift()

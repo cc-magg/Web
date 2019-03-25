@@ -1,5 +1,25 @@
 # WEB - changelog
 
+## [v0.0.4] 2019-03-25
+
+### Added
+
+-   nothing
+
+### Changed
+
+-   view 'prueba/account/password', it's connected with the _api server_
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   api ~0.0.1
+-   mongoDB
+
+
 ## [v0.0.3] 2019-03-25
 
 ### Added
@@ -19,6 +39,10 @@
 ### Deleted
 
 -   nothing
+
+### Compatibility (for it to works well)
+
+-   mongoDB
 
 
 ## [v0.0.2] 2019-03-22

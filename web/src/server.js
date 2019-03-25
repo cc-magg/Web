@@ -3,13 +3,14 @@
 const express = require('express')
 const http = require('http')
 const path = require('path')
-const api = require('./api')
+const routes = require('./api')
 const socket = require('socket.io')
 const mongoose = require('mongoose')
 const chalk = require('chalk')
-const debug = require('debug')('API-server')
+const debug = require('debug')('WEB-server')
+const asyncify = require('express-asyncify')
 
-const app = express()
+const app = asyncify(express.Router())
 const server = http.createServer(app)
 const io = socket.listen(server)
 
@@ -22,12 +23,12 @@ require('./sockets')(io)
 
 // settings
 const port = process.env.PORT || 3000
-app.use(api)
+app.use('/', routes)
 app.use('/chat', express.static(path.join(__dirname, 'public'))) // this is the chat view, it doesn't work in the api.js file
 
 /* MANEJO DE ERRORES */
 app.use((err, req, res, next) => {
-  console.log(`${chalk.red('SERVER ERROR:')} ${err}`)
+  console.log(`${chalk.red('WEB SERVER ERROR:')} ${err}`)
   debug(`${chalk.blue('Error:')} ${err.message}`)
   if (err.message.match(/not found/)) { // si en algun lugar dice not found
     return res.status(404).send({ error: err.message })

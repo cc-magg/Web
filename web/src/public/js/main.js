@@ -5,8 +5,8 @@ let users = []
 // Aqui ponemos jquery para no tener que usar react
 $(function () {
   const socket = io() // IO is defined on the html
-  
-  console.log('id....'+userId)
+
+  console.log('id....' + userId)
 
   // obtenemos DOM elements de la interface
   const $messageForm = $('#message-form')
