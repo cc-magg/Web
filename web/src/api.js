@@ -6,7 +6,11 @@ const nodemailer = require('nodemailer')
 const api = express.Router()
 
 api.get('/', (req, res, next) => {
-  return res.send('aqui esta el home!')
+  return res.send('estamos online!!')
+})
+
+api.get('/prueba', (req, res, next) => {
+  return res.send('estamos online!!')
 })
 
 api.get('/send/:message', (req, res, next) => {

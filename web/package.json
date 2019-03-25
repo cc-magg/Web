@@ -13,7 +13,9 @@
     "chalk": "^2.4.2",
     "debug": "^4.1.1",
     "express": "^4.16.4",
-    "nodemailer": "^5.1.1"
+    "mongoose": "^5.4.19",
+    "nodemailer": "^5.1.1",
+    "socket.io": "^2.2.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.10",
