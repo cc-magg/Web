@@ -1,5 +1,25 @@
 # WEB - changelog
 
+## [v0.0.5] 2019-03-26
+
+### Added
+
+-   nothing
+
+### Changed
+
+-   view 'prueba/account/password' now connected with the _api server_ using **_JWT_**
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   api ~0.0.2
+-   mongoDB
+
+
 ## [v0.0.4] 2019-03-25
 
 ### Added

@@ -4,12 +4,13 @@ const express = require('express')
 const chalk = require('chalk')
 const nodemailer = require('nodemailer')
 const asyncify = require('express-asyncify')
-const api = asyncify(express.Router())
 const request = require('request-promise-native')
 const { endpoint, apiToken } = require('./config')
 
-api.get('/', (req, res) => {
-  res.end(`Hola!`)
+const api = asyncify(express.Router())
+
+api.get('/home/', (req, res, next) => {
+  res.send(`Hola!`)
 })
 
 api.get('/prueba/:username/:password', async (req, res, next) => {
@@ -30,7 +31,7 @@ api.get('/prueba/:username/:password', async (req, res, next) => {
   } catch (err) {
     return next(err)
   }
-  res.end(`${JSON.stringify(result)}`)
+  res.send(`${JSON.stringify(result)}`)
 })
 
 api.get('/send/:message', (req, res, next) => {
@@ -58,13 +59,13 @@ api.get('/send/:message', (req, res, next) => {
       console.log('Email sent: ' + info.response)
     }
   })
-  return res.end('aqui esta el home!')
+  res.send('aqui esta el home!')
 })
 
 process.on('uncaughtException', handleFatalError)
 process.on('unhandledRejection', handleFatalError)
 function handleFatalError (err) {
-  console.error(`${chalk.red('[fatal error]-web/api.js: ')} ${err}`)
+  console.error(`${chalk.red('[fatal error]-web/api.js: ')} ${err.message}`)
   console.error(err)
   process.exit(1)
 }

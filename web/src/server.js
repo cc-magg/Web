@@ -10,7 +10,7 @@ const chalk = require('chalk')
 const debug = require('debug')('WEB-server')
 const asyncify = require('express-asyncify')
 
-const app = asyncify(express.Router())
+const app = asyncify(express())
 const server = http.createServer(app)
 const io = socket.listen(server)
 
@@ -21,9 +21,10 @@ mongoose.connect('mongodb://localhost/web-chat', { useNewUrlParser: true }) // e
 
 require('./sockets')(io)
 
+
 // settings
 const port = process.env.PORT || 3000
-app.use('/', routes)
+app.use(routes)
 app.use('/chat', express.static(path.join(__dirname, 'public'))) // this is the chat view, it doesn't work in the api.js file
 
 /* MANEJO DE ERRORES */
