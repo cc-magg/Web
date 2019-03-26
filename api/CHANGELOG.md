@@ -1,4 +1,4 @@
-# WEB - changelog
+# API - changelog
 
 ## [v0.0.2] 2019-03-26
 
