@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Spinner should render as expected 1`] = `
+<_default
+  align=""
+  color="text-primary"
+  margin=""
+  padding=""
+  type="spinner-border"
+/>
+`;
+
+exports[`SpinnerContainer should render as expected 1`] = `
+<div
+  className="jsx-3507787210 undefined"
+>
+  <div
+    className="jsx-3507787210 undefined undefined undefined style"
+    role="status"
+  >
+    <span
+      className="jsx-3507787210 sr-only"
+    >
+      Loading...
+    </span>
+  </div>
+  <JSXStyle
+    dynamic={
+      Array [
+        undefined,
+      ]
+    }
+    id="2414451809"
+  >
+    .style.__jsx-style-dynamic-selector{color:undefined;}
+  </JSXStyle>
+</div>
+`;

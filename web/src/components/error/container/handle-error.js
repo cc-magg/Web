@@ -16,7 +16,9 @@ class HandleError extends Component {
         });
     }
     render() {
+        
         if (this.state.handleError) {
+            console.table(this.state.errorInfo);
             return <RegularError errorInfo={this.state.errorInfo} error={this.state.error} />
         } else {
             return (<div>{this.props.children}</div>)

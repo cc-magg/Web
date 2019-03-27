@@ -1,7 +1,6 @@
 import React from 'react';
 
 function RegularError(props) {
-    console.log('informacion del error: ' + props.errorInfo);
     return (
         <div>
             <h3 className="header">ERROR</h3>

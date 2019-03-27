@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Error should render as expected 1`] = `<div />`;
+
+exports[`ErrorContainer should render as expected 1`] = `
+<div
+  className="jsx-1329592948"
+>
+  <h3
+    className="jsx-1329592948 header"
+  >
+    ERROR
+  </h3>
+  <div
+    className="jsx-1329592948 errorContainer"
+  >
+    <div
+      className="jsx-1329592948 errorCard"
+    >
+      <p
+        className="jsx-1329592948"
+      >
+        ReferenceError: HomeComponnt is not defined
+      </p>
+      <div
+        className="jsx-1329592948 errorLocation"
+      >
+        Here is the error: 
+        error testing text
+      </div>
+    </div>
+  </div>
+  <JSXStyle
+    id="311577014"
+  >
+    .header.jsx-1329592948{width:100%;padding:10px;background-color:#455498;color:#fff;text-align:center;}.errorContainer.jsx-1329592948{width:100%;margin-top:50px;}.errorCard.jsx-1329592948{max-width:500px;margin:0 auto;padding:20px;background-color:#fff;border-radius:5px;box-shadow:0 4px 8px 0 rgba(0,0,0,0.2);}.errorLocation.jsx-1329592948{border-radius:5px;padding:10px;background-color:#feb5b9;}
+  </JSXStyle>
+  <JSXStyle
+    id="2727828427"
+  >
+    body{background-color:#87c2e3;}
+  </JSXStyle>
+</div>
+`;
