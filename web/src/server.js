@@ -24,8 +24,11 @@ require('./sockets')(io)
 
 // settings
 const port = process.env.PORT || 3000
-app.use(routes)
-app.use('/chat', express.static(path.join(__dirname, 'public'))) // this is the chat view, it doesn't work in the api.js file
+
+// app.use(routes)
+app.use('/chat', express.static(path.join(__dirname, 'public/static_files'))) // this is the chat view, it doesn't work in the api.js file
+app.use('/chat_moderator', express.static(path.join(__dirname, 'public'))) // this is the chat view, it doesn't work in the api.js file
+app.get('*', routes)
 
 /* MANEJO DE ERRORES */
 app.use((err, req, res, next) => {
@@ -36,7 +39,7 @@ app.use((err, req, res, next) => {
   }
   res.status(500).send({ error: `Api: ${err.message}` })
 })
-
+  
 if (!module.parent) {
   server.listen(port, () => {
     console.log(`${chalk.green('[ERP-api]')} server ready and listening on port ${port}`)

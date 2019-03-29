@@ -19,10 +19,34 @@ $(function () {
   let oldMinuteLoaded_FirstMessage = null
   let oldMinuteLoaded_LastMessage = null // minuto del ultimo mensaje cargado a inicio de pag
   let lastMinute = null // minuto del ultimo mensaje
+  let rooms = []
 
   // EVENTS
   socket.emit('new user', userId)
+  socket.emit('join room', 'moderator')
+  rooms.push('moderator')
+  socket.emit('get rooms')
+  socket.on('old rooms', function (oldRooms) { // save the old rooms
+    oldRooms.forEach(element => {
+      if (!rooms.includes(element)) {
+        rooms.push(element)
+        socket.emit('join room', element)
+      }
+    })
+    console.log('old rooms: '+rooms)
+  })
+  socket.on('new room', function (room) { // save the news rooms
+    if (!rooms.includes(room)) {
+      console.log('new room: '+room)
+      rooms.push(room)
+      socket.emit('join room', room)
+    }
+  })
+  socket.on('new room message', function (message) {
+    console.log('nuevo mensaje en el canal: '+message)
+  })
 
+  // cargamos los usuarios que ya estaban conectados
   socket.on('load users', function (users) {
     $usersList.empty()
     $usersList.append('<h1 class="usersListHeader">Friends</h1>')
@@ -91,27 +115,34 @@ $(function () {
   // enviando mensaje
   $messageForm.submit(event => {
     event.preventDefault() // previene el refrescado de pagina cada que damos clic al boton submit
-    // envia whisper
-    if ($messageBox.val().substring(0, 2) == '/w') {
-      let indexof = $messageBox.val().indexOf(' ')
-      const command = $messageBox.val().substr(0, indexof) // "/w"
-
-      let temporal = $messageBox.val().substr(parseInt(indexof) + 1, $messageBox.val().length) // "name message"
-      indexof = temporal.indexOf(' ')
-
-      let name = temporal.substr(0, indexof) // "name"
-      let message = temporal.substr(parseInt(indexof) + 1, temporal.length) // "message"
-      // console.log(`command: ${command} name: ${name} message: ${message}`)
-      const data = {
-        from: userId,
-        to: name,
-        message
+    // verificamos que el mensaje sea tenga un comando
+    let data = {}
+    if ($messageBox.val().substring(0, 1) == '/') {
+      const decryptedCommand = decryptCommand($messageBox.val())
+      // envia whisper
+      if (decryptedCommand.command == '/w') {
+        console.log('enviando datos')
+        data = {
+          from: userId,
+          to: decryptedCommand.name,
+          message: decryptedCommand.message
+        }
+        socket.emit('whisper', data)
+        socket.emit('join room', data.to)
+        $messageBox.val('')
+      } else if (decryptedCommand.command == '/R') { // envia mensaje a una room
+        console.log('enviando datos /R')
+        data = {
+          from: userId,
+          room: decryptedCommand.name,
+          message: decryptedCommand.message
+        }
+        socket.emit('send moderator message', data)
+        $messageBox.val('')
       }
-      socket.emit('whisper', data)
-      $messageBox.val('')
     } else {
       console.log('enviando datos')
-      const data = {
+      data = {
         from: userId,
         message: $messageBox.val()
       }
@@ -119,6 +150,17 @@ $(function () {
       $messageBox.val('')
     }
   })
+  const decryptCommand = function (messageWithCommand) {
+    let indexof = messageWithCommand.indexOf(' ')
+    const command = messageWithCommand.substr(0, indexof) // "/w"
+
+    let temporal = messageWithCommand.substr(parseInt(indexof) + 1, $messageBox.val().length) // "name message"
+    indexof = temporal.indexOf(' ')
+
+    const name = temporal.substr(0, indexof) // "name"
+    const message = temporal.substr(parseInt(indexof) + 1, temporal.length) // "message"
+    return { command, name, message }
+  }
 
   // recive whisper
   socket.on('new whisper', function (data) {
@@ -136,7 +178,7 @@ $(function () {
   socket.on('new message', function (data) {
     const messageDate = Line()
     if (data.from == userId) {
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">me:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">To ${data.room}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
     } else {
       $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
     }

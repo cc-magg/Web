@@ -1,5 +1,30 @@
 # WEB - changelog
 
+## [v0.0.6] 2019-03-29
+
+### Added
+
+-   view 'chat_moderator' with the next commands:
+    - /w <userId> <message> (a wishper that works with everyfrind online)
+    - /R <userId> <message> (a message to answer the user)
+    - <normal_message> (a message that all users can see)
+
+### Changed
+
+-   view 'chat' now can only send messages to the moderator (only works if the moderator is online too) but the user still have the command:
+    - /w <userId> <message>
+    - <normal_message> (a message that only the moderator online can see)
+
+### Deleted
+
+-   now the messages are not saved (until the work is done)
+
+### Compatibility (for it to works well)
+
+-   api ~0.0.2
+-   mongoDB
+
+
 ## [v0.0.5] 2019-03-26
 
 ### Added

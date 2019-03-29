@@ -3,6 +3,7 @@ const Chat = require('./models/Chat')
 const ObjectId = require('mongoose').Types.ObjectId
 let users = []
 this._userId = null
+let rooms = []
 
 module.exports = function (io) {
   io.on('connection', async socket => {
@@ -19,13 +20,30 @@ module.exports = function (io) {
       io.sockets.emit('new user connected', userId)
     })
 
+    socket.on('get rooms', function () {
+      io.to('moderator').emit('old rooms', rooms)
+    })
+    socket.on('join room', function (userId) {
+      if (!rooms.includes(userId)) {
+        rooms.push(userId)
+      }
+      socket.join(userId)
+      if (userId !== 'moderator') {
+        io.to('moderator').emit('new room', userId)
+      }
+      io.to(userId).emit('new room message', `new user connected to this room: ${userId}`)
+    })
+    socket.on('send moderator message', function (data) {
+      io.to(data.room).emit('new message', data)
+    })
+
     socket.on('send message', async function (data) {
-      const newMessage = new Chat({
+      /* const newMessage = new Chat({
         from: data.from,
         message: data.message
-      })
-      await newMessage.save()
-      io.sockets.emit('new message', data)
+      }) */
+      io.to(data.from).emit('new message', data)
+      // await newMessage.save()
     })
 
     socket.on('whisper', function (data) {
