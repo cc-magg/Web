@@ -1,5 +1,7 @@
 'use strict'
 const userId = Math.random() * (10 - 1) + 1
+// const userId = 'someUser2'
+const room = 'someUser2'
 let users = []
 
 // Aqui ponemos jquery para no tener que usar react
@@ -22,11 +24,10 @@ $(function () {
 
   // EVENTS
   socket.emit('new user', userId)
-  socket.emit('join room', userId)
 
   socket.on('load users', function (users) {
     $usersList.empty()
-    $usersList.append('<h1 class="usersListHeader">Friends</h1>')
+    $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
     for( let i = 0; i < users.length; i++) {
       if (users[i] === userId) {
         $usersList.append(`<p>My id: ${users[i]}</p>`)
@@ -35,48 +36,59 @@ $(function () {
     }
   })
   
-  socket.on('new room message', function (message) {
-    console.log('nuevo mensaje en el canal: '+message)
+  const roomConnection = {
+    userId,
+    room
+  }
+  socket.emit('join room', roomConnection) // creamos nuestra room y nos agregamos a ella
+  //socket.emit('load room', roomLoadMessages)
+  socket.on('new room message', function (payload) { // recibimos mensajes de nuestra habitacion
+    console.log('nuevo mensaje en el canal: '+payload.message)
   })
 
   // cargamos mensajes viejos
-  socket.on('load old messages', function (messages) {
-    let day = null
-    for (let i = 0; i < messages.length; i++) {
-      const message_date = messages[i].created_at
-      const Year = message_date.substr(0, 4) // "2019-02-27T19:45:39.918Z"
-      const Month = message_date.substr(5, 2)
-      const Day = message_date.substr(8, 2)
-      const Hour = message_date.substr(11, 2)
-      const Minute = message_date.substr(14, 2)
-      const Second = message_date.substr(17, 2)
+  socket.on('load old messages', function (payload) {
+    const messages = payload.roomMessages
+    const to = payload.to
+    console.log('new message to:'+to)
+    if (to === String(userId)) { // verificamos que la recarga de mensjaes anteriores que mando el servidor la haya pedido este cliente
+      let day = null
+      for (let i = 0; i < messages.length; i++) {
+        const message_date = messages[i].created_at
+        const Year = message_date.substr(0, 4) // "2019-02-27T19:45:39.918Z"
+        const Month = message_date.substr(5, 2)
+        const Day = message_date.substr(8, 2)
+        const Hour = message_date.substr(11, 2)
+        const Minute = message_date.substr(14, 2)
+        const Second = message_date.substr(17, 2)
 
-      if (i === messages.length - 1) {
-        oldMinuteLoaded_LastMessage = Day
-      }
+        if (i === messages.length - 1) {
+          oldMinuteLoaded_LastMessage = Day
+        }
 
-      if ( i === 0) {
-        oldIdLoaded_FirstMessage = messages[i]._id
-        oldMinuteLoaded_FirstMessage = Day
-      }
+        if ( i === 0) {
+          oldIdLoaded_FirstMessage = messages[i]._id
+          oldMinuteLoaded_FirstMessage = Day
+        }
 
-      // console.log(`${Year}:${Month}:${Day}:${Hour}:${Minute}:${Second}`)
-      if (!day) {
-        day = Day
-        $chat.append(`<hr><div  id="Minuto" style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
-        // console.log( Minute + '--First message and day registrated ' + messages[i].message)
-      } else if (day !== Day) { // day=59  minute= 49
-        $chat.append(`<hr><div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div><br/>`)
-        // console.log( 'day: '+day+'-- Minute: '+Minute + '--new day ' + messages[i].message)
-        day = Day
-      } else if (day === Day) {
-        // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
-      }
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
-      if (messages[i + 1]) {
-        const nextMinute = messages[i + 1].created_at.substr( 8, 2 )
-        if (nextMinute !== Day) {
-          $chat.append(`<div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
+        // console.log(`${Year}:${Month}:${Day}:${Hour}:${Minute}:${Second}`)
+        if (!day) {
+          day = Day
+          $chat.append(`<hr><div  id="Minuto" style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
+          // console.log( Minute + '--First message and day registrated ' + messages[i].message)
+        } else if (day !== Day) { // day=59  minute= 49
+          $chat.append(`<hr><div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div><br/>`)
+          // console.log( 'day: '+day+'-- Minute: '+Minute + '--new day ' + messages[i].message)
+          day = Day
+        } else if (day === Day) {
+          // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
+        }
+        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        if (messages[i + 1]) {
+          const nextMinute = messages[i + 1].created_at.substr( 8, 2 )
+          if (nextMinute !== Day) {
+            $chat.append(`<div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
+          }
         }
       }
     }
@@ -108,13 +120,14 @@ $(function () {
         message: decryptedCommand.message
       }
       socket.emit('whisper', data)
-      socket.emit('join room', data.to)
+      // socket.emit('join room', data.to)
       $messageBox.val('')
     } else {
       console.log('enviando datos')
       data = {
         from: userId,
-        message: $messageBox.val()
+        message: $messageBox.val(),
+        room
       }
       socket.emit('send message', data)
       $messageBox.val('')
@@ -150,7 +163,7 @@ $(function () {
     if (data.from == userId) {
       $chat.append(`<span style="font-weight: 700; color: #ff8f00;">me:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
     } else {
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">Moderator ${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
     }
   })
 
@@ -224,7 +237,7 @@ $(function () {
   // recive lista con los usuarios renovada
   socket.on('user disconnected', function (users) {
     $usersList.empty()
-    $usersList.append('<h1 class="usersListHeader">Friends</h1>')
+    $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
     for( let i = 0; i < users.length; i++) {
       if (users[i] === userId) {
         $usersList.append(`<p>My id: ${users[i]}</p>`)

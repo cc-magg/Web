@@ -1,5 +1,5 @@
 'use strict'
-const userId = Math.random() * (10 - 1) + 1
+let userId = Math.random() * (10 - 1) + 1
 let users = []
 
 // Aqui ponemos jquery para no tener que usar react
@@ -13,6 +13,7 @@ $(function () {
   const $messageBox = $('#message')
   const $chat = $('#chat')
   const $usersList = $('#usersList')
+  const $roomsList = $('#roomsList')
   const $moreMessages = $('#moreMessages')
   console.log(`My Id is: ${userId}`)
   let oldIdLoaded_FirstMessage = null
@@ -20,36 +21,169 @@ $(function () {
   let oldMinuteLoaded_LastMessage = null // minuto del ultimo mensaje cargado a inicio de pag
   let lastMinute = null // minuto del ultimo mensaje
   let rooms = []
+  let roomsConnected = []
+  const moderatorRoom = `moderator ${userId}`
+  userId = `moderator ${userId}`
 
   // EVENTS
   socket.emit('new user', userId)
-  socket.emit('join room', 'moderator')
-  rooms.push('moderator')
-  socket.emit('get rooms')
+
+  let roomConnection = {
+    userId,
+    room: moderatorRoom,
+    loadOldMessage: true
+  }
+  socket.emit('join room', roomConnection) // creamos la room: moderator userId y nos unimos a ella
+  let newUserToRoom = {
+    room: moderatorRoom, 
+    users: [userId]
+  }
+  rooms.push(newUserToRoom) // guardamos la habitacion que acabamos de crear en la lista de habitaciones
+  socket.emit('get rooms', moderatorRoom) // pedimos las habitaaciones que ya estaban creadas antes de conectarnos
   socket.on('old rooms', function (oldRooms) { // save the old rooms
-    oldRooms.forEach(element => {
-      if (!rooms.includes(element)) {
-        rooms.push(element)
-        socket.emit('join room', element)
+    oldRooms.forEach(function (lookedRoom) {
+      const oldUsers = lookedRoom.users
+      lookedRoom = lookedRoom.room
+      let alreadyExists = false
+      for (const iterator of rooms) {
+        if (iterator.room === lookedRoom) {
+          alreadyExists = true
+        }
+      }
+      if (alreadyExists == false) { // si no existe en nuestra lista, procedemos a agregar el room a nuestra lista y nos suscribimos a e¡dicha room
+        newUserToRoom = {
+          room: lookedRoom,
+          users: []
+        }
+        oldUsers.forEach(function (user) {
+          newUserToRoom.users.push(user)
+        })
+        rooms.push(newUserToRoom)
+        roomConnection = {
+          userId: moderatorRoom,
+          room: lookedRoom,
+          loadOldMessage: true
+        }
+        socket.emit('join room', roomConnection)
       }
     })
-    console.log('old rooms: '+rooms)
+    console.log('old rooms: '+JSON.stringify(rooms))
   })
-  socket.on('new room', function (room) { // save the news rooms
-    if (!rooms.includes(room)) {
-      console.log('new room: '+room)
-      rooms.push(room)
-      socket.emit('join room', room)
+  socket.on('new room', function (payload) { // save the news rooms
+    console.log('newRoom-----------------------desde new room: '+JSON.stringify(payload))
+    const { room, user, message } = payload
+    let roomAlreadyExists = false
+    let roomIndex = null
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].room === room) {
+        roomAlreadyExists = true
+        roomIndex = i
+        break
+      }
+    }
+    if (roomAlreadyExists == false) { // si no existe en nuestra lista, procedemos a agregar el room a nuestra lista y nos suscribimos a e¡dicha room
+      newUserToRoom = {
+        room,
+        users: []
+      }
+      newUserToRoom.users.push(user)
+      rooms.push(newUserToRoom)
+    } else if (roomAlreadyExists == true) {
+      let userAlreadyExists = false
+      rooms[roomIndex].users.forEach(function (lookedUser) {
+        if (lookedUser === user) {
+          userAlreadyExists = true
+        }
+      })
+      if (userAlreadyExists == false) {
+        rooms[roomIndex].users.push(user)
+      }
+    }
+    let alreadysubscribedOnRoom = false
+    for (const iterator of rooms) {
+      if (iterator.room == room) {
+        alreadysubscribedOnRoom = true
+      }
+    }
+    if (alreadysubscribedOnRoom == false) {
+      roomsConnected.push(room)
+      roomConnection = {
+        userId: moderatorRoom,
+        room,
+        loadOldMessage: true
+      }
+      socket.emit('join room', roomConnection)
+    } else {
+      roomConnection = {
+        userId: moderatorRoom,
+        room,
+        loadOldMessage: false
+      }
+      socket.emit('join room', roomConnection)
     }
   })
-  socket.on('new room message', function (message) {
+  socket.on('new room message', function (payload) { // guardamos nuevas habitaciones creadas
+    const {room, user, message} = payload
     console.log('nuevo mensaje en el canal: '+message)
+    let roomIndex = null
+    for (let i = 0; i < rooms.length; i++) {
+      if (rooms[i].room === room) {
+        roomIndex = i
+        break
+      }
+    }
+    let userAlreadyExists = false
+    rooms[roomIndex].users.forEach(function (lookedUser) {
+      if (lookedUser === user) {
+        userAlreadyExists = true
+      }
+    })
+    if (userAlreadyExists == false) {
+      rooms[roomIndex].users.push(user)
+    }
+    console.log('AAAAAAAAAAAAAA-----------------------desde new room message: '+JSON.stringify(rooms))
+    /* ACTUALIZAMOS LA LISTA DE ROOMS */
+    $roomsList.empty()
+    $roomsList.append('<h1 class="usersListHeader">Rooms</h1>')
+    for (const iterator of rooms) {
+      $roomsList.append(`<p><span style="text-align: left; font-weight: 700; font-size: 20px;">Room: </span>${iterator.room}</p><p style="text-align: left; font-weight: 700; font-size: 20px;">users:</p>`)
+      iterator.users.forEach(function (userID) {
+        if (userID === userId) {
+          $roomsList.append(`<p style="text-align: left;">Me: ${userID}</p>`)
+        } else {
+          $roomsList.append(`<p style="text-align: left;">${userID}</p>`)
+        }
+      })
+    }
+    /* roomConnection = {
+      userId: moderatorRoom,
+      room: lookedRoom
+    }
+    socket.emit('join room', roomConnection) */
+    /* ACTUALIZAMOS LA LISTA DE ROOMS */
+    /*for (const iterator of rooms) {
+      if(iterator.room === room) {
+        iterator.users.push(user)
+      }
+    }
+    $roomsList.empty()
+    $roomsList.append('<h1 class="usersListHeader">Rooms</h1>')
+    for (const iterator of rooms) {
+      $roomsList.append(`<p>My room: ${rooms[i]}</p><p style="text-align: left;">users:</p>`)
+      iterator.users.forEach(function (userID) {
+        if (userID === userId) {
+          $roomsList.append(`<p style="text-align: left;">Me: ${userID}</p>`)
+        } else {
+          $roomsList.append(`<p style="text-align: left;">${userID}</p>`)
+        }
+      })
+    }*/
   })
 
   // cargamos los usuarios que ya estaban conectados
   socket.on('load users', function (users) {
     $usersList.empty()
-    $usersList.append('<h1 class="usersListHeader">Friends</h1>')
+    $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
     for( let i = 0; i < users.length; i++) {
       if (users[i] === userId) {
         $usersList.append(`<p>My id: ${users[i]}</p>`)
@@ -59,43 +193,48 @@ $(function () {
   })
 
   // cargamos mensajes viejos
-  socket.on('load old messages', function (messages) {
-    let day = null
-    for (let i = 0; i < messages.length; i++) {
-      const message_date = messages[i].created_at
-      const Year = message_date.substr(0, 4) // "2019-02-27T19:45:39.918Z"
-      const Month = message_date.substr(5, 2)
-      const Day = message_date.substr(8, 2)
-      const Hour = message_date.substr(11, 2)
-      const Minute = message_date.substr(14, 2)
-      const Second = message_date.substr(17, 2)
+  socket.on('load old messages', function (payload) {
+    const messages = payload.roomMessages
+    const to = payload.to
+    console.log('new message to:'+to+'---'+typeof(to))
+    if (to === String(userId)) { // verificamos que la recarga de mensjaes anteriores que mando el servidor la haya pedido este cliente
+      let day = null
+      for (let i = 0; i < messages.length; i++) {
+        const message_date = messages[i].created_at
+        const Year = message_date.substr(0, 4) // "2019-02-27T19:45:39.918Z"
+        const Month = message_date.substr(5, 2)
+        const Day = message_date.substr(8, 2)
+        const Hour = message_date.substr(11, 2)
+        const Minute = message_date.substr(14, 2)
+        const Second = message_date.substr(17, 2)
 
-      if (i === messages.length - 1) {
-        oldMinuteLoaded_LastMessage = Day
-      }
+        if (i === messages.length - 1) {
+          oldMinuteLoaded_LastMessage = Day
+        }
 
-      if ( i === 0) {
-        oldIdLoaded_FirstMessage = messages[i]._id
-        oldMinuteLoaded_FirstMessage = Day
-      }
+        if ( i === 0) {
+          oldIdLoaded_FirstMessage = messages[i]._id
+          oldMinuteLoaded_FirstMessage = Day
+        }
 
-      // console.log(`${Year}:${Month}:${Day}:${Hour}:${Minute}:${Second}`)
-      if (!day) {
-        day = Day
-        $chat.append(`<hr><div  id="Minuto" style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
-        // console.log( Minute + '--First message and day registrated ' + messages[i].message)
-      } else if (day !== Day) { // day=59  minute= 49
-        $chat.append(`<hr><div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div><br/>`)
-        // console.log( 'day: '+day+'-- Minute: '+Minute + '--new day ' + messages[i].message)
-        day = Day
-      } else if (day === Day) {
-        // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
-      }
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
-      if (messages[i + 1]) {
-        const nextMinute = messages[i + 1].created_at.substr( 8, 2 )
-        if (nextMinute !== Day) {
-          $chat.append(`<div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
+        // console.log(`${Year}:${Month}:${Day}:${Hour}:${Minute}:${Second}`)
+        if (!day) {
+          day = Day
+          $chat.append(`<hr><div  id="Minuto" style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
+          // console.log( Minute + '--First message and day registrated ' + messages[i].message)
+        } else if (day !== Day) { // day=59  minute= 49
+          $chat.append(`<hr><div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div><br/>`)
+          // console.log( 'day: '+day+'-- Minute: '+Minute + '--new day ' + messages[i].message)
+          day = Day
+        } else if (day === Day) {
+          // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
+        }
+        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        if (messages[i + 1]) {
+          const nextMinute = messages[i + 1].created_at.substr( 8, 2 )
+          if (nextMinute !== Day) {
+            $chat.append(`<div style="width:100%; text-align: center; color: #9c9c9c; font-size: 11px;">${Day}</div>`)
+          }
         }
       }
     }
@@ -128,16 +267,16 @@ $(function () {
           message: decryptedCommand.message
         }
         socket.emit('whisper', data)
-        socket.emit('join room', data.to)
+        // socket.emit('join room', data.to)
         $messageBox.val('')
       } else if (decryptedCommand.command == '/R') { // envia mensaje a una room
-        console.log('enviando datos /R')
+        console.log('enviando datos con command: /R')
         data = {
-          from: userId,
-          room: decryptedCommand.name,
-          message: decryptedCommand.message
+          from: moderatorRoom,
+          message: decryptedCommand.message,
+          room: decryptedCommand.name
         }
-        socket.emit('send moderator message', data)
+        socket.emit('send message', data)
         $messageBox.val('')
       }
     } else {
@@ -146,7 +285,7 @@ $(function () {
         from: userId,
         message: $messageBox.val()
       }
-      socket.emit('send message', data)
+      socket.emit('send moderator message', data)
       $messageBox.val('')
     }
   })
@@ -254,7 +393,7 @@ $(function () {
   // recive lista con los usuarios renovada
   socket.on('user disconnected', function (users) {
     $usersList.empty()
-    $usersList.append('<h1 class="usersListHeader">Friends</h1>')
+    $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
     for( let i = 0; i < users.length; i++) {
       if (users[i] === userId) {
         $usersList.append(`<p>My id: ${users[i]}</p>`)

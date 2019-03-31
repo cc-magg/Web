@@ -1,5 +1,32 @@
 # WEB - changelog
 
+## [v0.0.7] 2019-03-31
+
+### Added
+
+-   rooms, the idea is 1 room per account (1 account can have multiple sessions)
+
+### Changed
+
+-   The messages are now saved again, it is saved and showed by room.
+-   view 'chat_moderator' now gets subscribed to:
+    - the old rooms
+    - the new rooms
+    automatically, and can see what rooms exists and who is subscribed to which room, and the moderator now have:
+      - /w <userId> <message> (a wishper that works with everyfrind online)
+      - /R <room> <message> (a message to answer the user)
+      - <normal_message> (a message that everybody can see)
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   api ~0.0.2
+-   mongoDB
+
+
 ## [v0.0.6] 2019-03-29
 
 ### Added

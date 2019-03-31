@@ -39,7 +39,7 @@ app.use((err, req, res, next) => {
   }
   res.status(500).send({ error: `Api: ${err.message}` })
 })
-  
+
 if (!module.parent) {
   server.listen(port, () => {
     console.log(`${chalk.green('[ERP-api]')} server ready and listening on port ${port}`)
