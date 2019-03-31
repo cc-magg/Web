@@ -9,16 +9,37 @@ class HomePage extends Component {
     state = {
         temp: 0
     }
-    render () {
+    componentDidMount = () => {
+        /*if ("serviceWorker" in navigator) {
+            try {
+                navigator.serviceWorker.register("/sw.js");
+                console.log("Service worker registrated");
+            } catch (error) {
+                console.error("Service worker registration failed "+error);
+            }
+        } else {
+            console.log("Service worker not supported");
+        }*/
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js").then(reg => {
+                // registration worked
+                console.log('Registration succeeded. Scope is ' + reg.scope);
+            }).catch(error => {
+                // registration failed
+                console.log('Registration failed with ' + error);
+            });
+        }
+    }
+    render() {
         return <Home />
     }
 }
 
-function mapStateToProps (state, props) {
+function mapStateToProps(state, props) {
     return {
     }
 }
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps(dispatch) {
     return {
         actions: bindActionCreators(actions, dispatch)
     }

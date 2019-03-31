@@ -1,0 +1,26 @@
+{
+    "short_name": "MAGG",
+    "name": "Web aplication for MAGG",
+    "icons": [
+        {
+            "src": "/static/logo48.png",
+            "type": "image/png",
+            "sizes": "48x48"
+        },
+        {
+            "src": "/static/logo96.png",
+            "type": "image/png",
+            "sizes": "96x96"
+        },
+        {
+            "src": "/static/logo192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        }
+    ],
+    "start_url": "http://localhost:3000/",
+    "background_color": "#2196F3",
+    "display": "standalone",
+    "orientation": "portrait",
+    "theme_color": "#2196F3"
+}
