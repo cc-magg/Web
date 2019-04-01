@@ -28,6 +28,7 @@ $(function () {
   // EVENTS
   socket.emit('new user', userId)
 
+  /* ROOMS EVENTS */
   let roomConnection = {
     userId,
     room: moderatorRoom,
@@ -39,8 +40,9 @@ $(function () {
     users: [userId]
   }
   rooms.push(newUserToRoom) // guardamos la habitacion que acabamos de crear en la lista de habitaciones
-  socket.emit('get rooms', moderatorRoom) // pedimos las habitaaciones que ya estaban creadas antes de conectarnos
-  socket.on('old rooms', function (oldRooms) { // save the old rooms
+
+  socket.emit('get rooms', moderatorRoom) // pedimos las habitaaciones que ya estaban creadas (junto con sus usuarios) antes de conectarnos
+  socket.on('old rooms', function (oldRooms) { // 1) guardamos su room junto con su usuario y 2) nos subscrimos a su room
     oldRooms.forEach(function (lookedRoom) {
       const oldUsers = lookedRoom.users
       lookedRoom = lookedRoom.room
@@ -69,8 +71,8 @@ $(function () {
     })
     console.log('old rooms: '+JSON.stringify(rooms))
   })
-  socket.on('new room', function (payload) { // save the news rooms
-    console.log('newRoom-----------------------desde new room: '+JSON.stringify(payload))
+
+  socket.on('new room', function (payload) { // cuando un usuario se conecta: 1) guardamos su room 2) nos subscribimos a su room
     const { room, user, message } = payload
     let roomAlreadyExists = false
     let roomIndex = null
@@ -81,7 +83,7 @@ $(function () {
         break
       }
     }
-    if (roomAlreadyExists == false) { // si no existe en nuestra lista, procedemos a agregar el room a nuestra lista y nos suscribimos a e¡dicha room
+    if (roomAlreadyExists == false) { // si no existe en nuestra lista, procedemos a agregar el room a nuestra lista y nos suscribimos a dicha room
       newUserToRoom = {
         room,
         users: []
@@ -122,7 +124,7 @@ $(function () {
       socket.emit('join room', roomConnection)
     }
   })
-  socket.on('new room message', function (payload) { // guardamos nuevas habitaciones creadas
+  socket.on('new room message', function (payload) { // 1) actualizamos su room agregandole agregando el nuevo user 2) actualizamos la Room list
     const {room, user, message} = payload
     console.log('nuevo mensaje en el canal: '+message)
     let roomIndex = null
@@ -141,7 +143,6 @@ $(function () {
     if (userAlreadyExists == false) {
       rooms[roomIndex].users.push(user)
     }
-    console.log('AAAAAAAAAAAAAA-----------------------desde new room message: '+JSON.stringify(rooms))
     /* ACTUALIZAMOS LA LISTA DE ROOMS */
     $roomsList.empty()
     $roomsList.append('<h1 class="usersListHeader">Rooms</h1>')
@@ -155,30 +156,8 @@ $(function () {
         }
       })
     }
-    /* roomConnection = {
-      userId: moderatorRoom,
-      room: lookedRoom
-    }
-    socket.emit('join room', roomConnection) */
-    /* ACTUALIZAMOS LA LISTA DE ROOMS */
-    /*for (const iterator of rooms) {
-      if(iterator.room === room) {
-        iterator.users.push(user)
-      }
-    }
-    $roomsList.empty()
-    $roomsList.append('<h1 class="usersListHeader">Rooms</h1>')
-    for (const iterator of rooms) {
-      $roomsList.append(`<p>My room: ${rooms[i]}</p><p style="text-align: left;">users:</p>`)
-      iterator.users.forEach(function (userID) {
-        if (userID === userId) {
-          $roomsList.append(`<p style="text-align: left;">Me: ${userID}</p>`)
-        } else {
-          $roomsList.append(`<p style="text-align: left;">${userID}</p>`)
-        }
-      })
-    }*/
   })
+  /*///////////////////////////////////////////////////////////*/
 
   // cargamos los usuarios que ya estaban conectados
   socket.on('load users', function (users) {
@@ -229,7 +208,15 @@ $(function () {
         } else if (day === Day) {
           // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
         }
-        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        if (messages[i].room === 'All') {
+          if (messages[i].from == userId) {
+            $chat.append(`<span style="font-weight: 700; color: #ff5400;">To ${messages[i].room}:</span> ${messages[i].message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${messages[i].from}</span><br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+          } else {
+            $chat.append(`<span style="font-weight: 700; color: #ff5400;">${messages[i].room}:</span> ${messages[i].message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${messages[i].from}</span><br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+          }
+        } else {
+          $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        }
         if (messages[i + 1]) {
           const nextMinute = messages[i + 1].created_at.substr( 8, 2 )
           if (nextMinute !== Day) {
@@ -283,7 +270,8 @@ $(function () {
       console.log('enviando datos')
       data = {
         from: userId,
-        message: $messageBox.val()
+        message: `${$messageBox.val()}`,
+        room: 'All'
       }
       socket.emit('send moderator message', data)
       $messageBox.val('')
@@ -316,10 +304,18 @@ $(function () {
   // recive nuevos mensajes
   socket.on('new message', function (data) {
     const messageDate = Line()
-    if (data.from == userId) {
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">To ${data.room}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+    if (data.room === 'All') {
+      if (data.from == userId) {
+        $chat.append(`<span style="font-weight: 700; color: #ff5400;">To ${data.room}:</span> ${data.message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${data.from}</span><br/><span class="messageDate">${messageDate}</span></br>`)
+      } else {
+        $chat.append(`<span style="font-weight: 700; color: #ff5400;">${data.room}:</span> ${data.message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${data.from}</span><br/><span class="messageDate">${messageDate}</span></br>`)
+      }
     } else {
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      if (data.from == userId) {
+        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">To ${data.room}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      } else {
+        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      }
     }
   })
 
@@ -346,7 +342,8 @@ $(function () {
     console.log('asked for new messages?')
     const data = {
       messageId: oldIdLoaded_FirstMessage,
-      userId
+      userId,
+      room: rooms
     }
     socket.emit('ChargeMoreMessages', data)
   })
@@ -385,7 +382,15 @@ $(function () {
         } else if (day === Day) {
           // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
         }
-        $chat.prepend(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Day}</span></br>`)
+        if (messages[i].room === 'All') {
+          if (messages[i].from == userId) {
+            $chat.prepend(`<span style="font-weight: 700; color: #ff5400;">To ${messages[i].room}:</span> ${messages[i].message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${messages[i].from}</span><br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+          } else {
+            $chat.prepend(`<span style="font-weight: 700; color: #ff5400;">${messages[i].room}:</span> ${messages[i].message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${messages[i].from}</span><br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+          }
+        } else {
+          $chat.prepend(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        }
       }
     }
   })

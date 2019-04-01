@@ -83,7 +83,11 @@ $(function () {
         } else if (day === Day) {
           // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
         }
-        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        if (messages[i].room === 'All') {
+            $chat.append(`<span style="font-weight: 700; color: #ff5400;">${messages[i].room}:</span> ${messages[i].message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${messages[i].from}</span><br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        } else {
+          $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        }
         if (messages[i + 1]) {
           const nextMinute = messages[i + 1].created_at.substr( 8, 2 )
           if (nextMinute !== Day) {
@@ -163,7 +167,11 @@ $(function () {
     if (data.from == userId) {
       $chat.append(`<span style="font-weight: 700; color: #ff8f00;">me:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
     } else {
-      $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      if (data.room === 'All') {
+        $chat.append(`<span style="font-weight: 700; color: #ff5400;">${data.room}:</span> ${data.message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${data.from}</span><br/><span class="messageDate">${messageDate}</span></br>`)
+      } else {
+        $chat.append(`<span style="font-weight: 700; color: #ff8f00;">${data.from}:</span> ${data.message}<br/><span class="messageDate">${messageDate}</span></br>`)
+      }
     }
   })
 
@@ -190,7 +198,8 @@ $(function () {
     console.log('asked for new messages?')
     const data = {
       messageId: oldIdLoaded_FirstMessage,
-      userId
+      userId,
+      room
     }
     socket.emit('ChargeMoreMessages', data)
   })
@@ -229,7 +238,11 @@ $(function () {
         } else if (day === Day) {
           // console.log( 'day: '+day+'-- Minute: '+Minute + '--Same day ' + messages[i].message)
         }
-        $chat.prepend(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Day}</span></br>`)
+        if (messages[i].room === 'All') {
+          $chat.prepend(`<span style="font-weight: 700; color: #ff5400;">${messages[i].room}:</span> ${messages[i].message} <span style="color: #9c9c9c; font-size: 13px;">... This was a message for everyone on the website. from: ${messages[i].from}</span><br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        } else {
+          $chat.prepend(`<span style="font-weight: 700; color: #ff8f00;">${messages[i].from}:</span> ${messages[i].message}<br/><span class="messageDate">${Hour}:${Minute}</span></br>`)
+        }
       }
     }
   })

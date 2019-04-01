@@ -25,9 +25,8 @@ module.exports = function (io) {
       io.to(moderatorRoom).emit('old rooms', rooms)
     })
     const loadRoom = async function (room, userId) {
-      console.log('loading room: '+room)
-      let roomMessages = await Chat.find({ room }).sort({ created_at: -1 }).limit(6)
-      console.log('loading room--'+roomMessages)
+      console.log('loading room: '+room+'--To: '+userId)
+      let roomMessages = await Chat.find({ $or: [ {room}, {room: 'All'}] }).sort({ created_at: -1 }).limit(6)
       roomMessages = roomMessages.sort({ created_at: -1 })
       const payload = {
         to: userId,
@@ -90,10 +89,7 @@ module.exports = function (io) {
         })
         loadRoom(room, user) // pedimos que al usuario le cargen los mensajes anteriores de la room
       } else if (!room.match(/moderator/) && user.match(/moderator/)) { // cuando un moderador se conecta a un room usuario
-        console.log('AAAAAAAAAAAAAD-----------------------'+loadOldMessage+'--'+typeof(loadOldMessage)+'-------'+JSON.stringify(room))
-        for (const iterator of room) {
-          console.log('DDDDDDDDDDDDDDDDD--'+JSON.stringify(iterator))
-        }
+        console.log('AAAAAAAAAAAAAD-----------------------')
         payload = {
           room,
           user,
@@ -105,8 +101,14 @@ module.exports = function (io) {
         }
       }
     })
-    socket.on('send moderator message', function (data) {
+    socket.on('send moderator message', async function (data) {
+      const newMessage = new Chat({
+        from: data.from,
+        message: data.message,
+        room: data.room
+      })
       io.sockets.emit('new message', data)
+      await newMessage.save()
     })
 
     socket.on('send message', async function (data) {
@@ -124,7 +126,7 @@ module.exports = function (io) {
     })
 
     socket.on('ChargeMoreMessages', async function (data) {
-      const messages = await GettingMesages(data.messageId)
+      const messages = await GettingMesages(data.messageId, data.userId, data.room)
       const newData = {
         messages,
         toUserId: data.userId
@@ -144,8 +146,19 @@ module.exports = function (io) {
   })
 }
 
-async function GettingMesages (messageId) {
-  let messages = await Chat.find({ _id: {$lte: ObjectId(messageId)} }).sort({ created_at: -1 }).limit(7) // more here: https://stackoverflow.com/questions/21947625/return-range-of-documents-around-id-in-mongodb
+async function GettingMesages (messageId, userId, room) {
+  let messages = null
+  if (String(userId).match(/moderator/)) {
+    let moderatorRooms = []
+    for (const iterator of room) {
+      moderatorRooms.push({room: iterator.room})
+    }
+    moderatorRooms.push({room: 'All'})
+    messages = await Chat.find({ $and: [ {$or: moderatorRooms}, {_id: {$lte: ObjectId(messageId)}} ] }).sort({ created_at: -1 }).limit(7) // more here: https://stackoverflow.com/questions/21947625/return-range-of-documents-around-id-in-mongodb
+  } else {
+    messages = await Chat.find({ $and: [ {$or: [{room},{room: 'All'}]}, {_id: {$lte: ObjectId(messageId)}} ] }).sort({ created_at: -1 }).limit(7) // more here: https://stackoverflow.com/questions/21947625/return-range-of-documents-around-id-in-mongodb
+    console.log(messages+'----'+typeof(messages))
+  }
   let newMessage = []
   for (let i = 0; i < messages.length; i++) {
     newMessage.push(messages[i])

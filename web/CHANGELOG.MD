@@ -1,5 +1,26 @@
 # WEB - changelog
 
+## [v0.0.8] 2019-04-1
+
+### Added
+
+-   nothing
+
+### Changed
+
+-   view 'chat_moderator' the <normal_message> now are saved and showed to everybody and say who send the message, and "see more messages" button now is working
+-   view 'chat' now show the <normal_message> if a moderator send it, and "see more messages" button now is working 
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   api ~0.0.2
+-   mongoDB
+
+
 ## [v0.0.7] 2019-03-31
 
 ### Added
