@@ -45,6 +45,7 @@
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.11.2",
     "enzyme-to-json": "^3.3.5",
+    "eslint-plugin-react-hooks": "^1.6.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",

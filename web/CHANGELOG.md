@@ -60,3 +60,24 @@
 ### Compatibility (for it to works well)
 
 -   nothing
+
+## [v0.1.1] 2019-04-01
+
+### Added
+
+-   hooks from react
+
+### Changed
+
+-   components menu and spinner now work from a single function component
+-   the menu component is now working with react hooks
+-   the test for the menu component is now testing just 1 snapshot
+-   the test for the snipper component is now 1 snapshot (not 2), the use of the given props and the use of the default values when there are no props
+
+### Deleted
+
+-   class (smart) and functional (dumb) components from menu and snipper, now they work with functional (but not dumb because of the hooks) components
+
+### Compatibility (for it to works well)
+
+-   nothing

@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Menu should render as expected 1`] = `<_default />`;
-
-exports[`MenuContainer should render as expected 1`] = `
+exports[`Menu should render as expected 1`] = `
 <div
   className="jsx-186130977"
 >
@@ -13,7 +11,8 @@ exports[`MenuContainer should render as expected 1`] = `
       className="jsx-186130977 navbar-brand"
       href="#"
     >
-      MAGG
+      MAGG 
+      Home clicked 0 times
     </a>
     <button
       aria-controls="navbarTogglerDemo02"
@@ -41,6 +40,7 @@ exports[`MenuContainer should render as expected 1`] = `
           <a
             className="jsx-186130977 nav-link"
             href="#"
+            onClick={[Function]}
           >
             Home 
             <span

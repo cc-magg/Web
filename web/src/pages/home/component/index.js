@@ -1,8 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 
-import Menu from '../../../components/menu/container/menu';
-import Spinner from '../../../components/spinner/container/index';
+import Menu from '../../../components/menu';
+import Spinner from '../../../components/spinner';
 
 export default props => <div>
     <Menu />

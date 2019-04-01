@@ -2,27 +2,33 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import toJson from 'enzyme-to-json'
 
-import SpinnerContainer from '../components/spinner/container'
-import SpinnerComponent from '../components/spinner/component'
+import Spinner from '../components/spinner'
 
 test('Spinner should render as expected', () => {
-    const wrapper = shallow(<SpinnerContainer />);
+    const wrapper = shallow(<Spinner />);
     const tree = toJson(wrapper);
 
     expect(tree).toMatchSnapshot();
 });
 
 test('Spinner component should recive the default props', () => {
-    const wrapper = shallow(<SpinnerContainer />);
-    const child = wrapper.find(SpinnerComponent);
-    
-    expect(child.props().type).toEqual("spinner-border");
-    expect(child.props().color).toEqual("text-primary");
+    const wrapper = shallow(<Spinner />);
+    const colorContainer = wrapper.find('#colorContainer');
+
+    //console.log(colorContainer.debug());
+    expect(wrapper.exists('.spinner-border')).toBe(true);
+    expect(colorContainer.prop('style')).toEqual({color: "blue"}); 
 });
 
-test('SpinnerContainer should render as expected', () => {
-    const wrapper = shallow(<SpinnerComponent />);
-    const tree = toJson(wrapper);
+test('Spinner component should use the props given', () => {
+    const wrapper = shallow(<Spinner
+        type={'spinner-grow'}
+        color = {'red'}
+        align = {'text-left'}
+    />);
+    const colorContainer = wrapper.find('#colorContainer');
 
-    expect(tree).toMatchSnapshot();
+    expect(wrapper.hasClass('text-left')).toBeTruthy();
+    expect(colorContainer.hasClass('spinner-grow')).toBeTruthy();
+    expect(colorContainer.prop('style')).toEqual({color: "red"});
 });

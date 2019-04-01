@@ -2,18 +2,10 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import toJson from 'enzyme-to-json'
 
-import MenuContainer from '../components/menu/container/menu'
-import MenuComponent from '../components/menu/component/menu'
+import Menu from '../components/menu'
 
 test('Menu should render as expected', () => {
-    const wrapper = shallow(<MenuContainer />);
-    const tree = toJson(wrapper);
-
-    expect(tree).toMatchSnapshot();
-});
-
-test('MenuContainer should render as expected', () => {
-    const wrapper = shallow(<MenuComponent />);
+    const wrapper = shallow(<Menu />);
     const tree = toJson(wrapper);
 
     expect(tree).toMatchSnapshot();

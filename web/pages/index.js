@@ -10,16 +10,6 @@ class HomePage extends Component {
         temp: 0
     }
     componentDidMount = () => {
-        /*if ("serviceWorker" in navigator) {
-            try {
-                navigator.serviceWorker.register("/sw.js");
-                console.log("Service worker registrated");
-            } catch (error) {
-                console.error("Service worker registration failed "+error);
-            }
-        } else {
-            console.log("Service worker not supported");
-        }*/
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("/sw.js").then(reg => {
                 // registration worked

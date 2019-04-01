@@ -1,2 +1,5 @@
 # para que no carge node_modules
 web/node_modules
+
+# para que no carge la compilacion de next
+web/.next
