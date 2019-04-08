@@ -81,3 +81,22 @@
 ### Compatibility (for it to works well)
 
 -   nothing
+
+## [v0.1.2] 2019-04-08
+
+### Added
+
+-   basic canvas in home
+-   logo size 512x512 required from manifest
+
+### Changed
+
+-   nothing
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   nothing

@@ -11,7 +11,7 @@ test('Spinner should render as expected', () => {
     expect(tree).toMatchSnapshot();
 });
 
-test('Spinner component should recive the default props', () => {
+test('Spinner component should use the default props', () => {
     const wrapper = shallow(<Spinner />);
     const colorContainer = wrapper.find('#colorContainer');
 
@@ -22,7 +22,7 @@ test('Spinner component should recive the default props', () => {
 
 test('Spinner component should use the props given', () => {
     const wrapper = shallow(<Spinner
-        type={'spinner-grow'}
+        type = {'spinner-grow'}
         color = {'red'}
         align = {'text-left'}
     />);

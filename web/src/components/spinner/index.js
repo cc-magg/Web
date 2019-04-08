@@ -16,15 +16,7 @@ export default props => {
 };
 
 /**colors:
- * blue                = text-primary
- * dark gray           = text-secondary
- * green               = text-success
- * red                 = text-danger
- * yellow              = text-warning
- * light blue          = text-info
- * gray                = text-light
- * negro               = text-dark
- * or a regular css color
+ * any color
 */
 
 /**types:

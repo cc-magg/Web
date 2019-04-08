@@ -2,12 +2,14 @@ import React from 'react';
 import Link from 'next/link';
 
 import Menu from '../../../components/menu';
+import CanvasHeader from './canvas';
 import Spinner from '../../../components/spinner';
 
 export default props => <div>
     <Menu />
     <div className="mainContainer">
         <h1>Hola Mundo!</h1>
+        <CanvasHeader />
         <p>{props.data}</p>
         <button type="button" className="btn btn-primary" onClick={() => props.sendMessage('mensaje nuevo')}>agregar dato</button><br />
         <Link href="/contact">
