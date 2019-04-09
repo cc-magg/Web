@@ -100,3 +100,24 @@
 ### Compatibility (for it to works well)
 
 -   nothing
+
+## [v0.1.3] 2019-04-09
+
+### Added
+
+-   temporal image for canvas background
+-   temporal text over the canvas header
+
+### Changed
+
+-   the canvas circles movement and amount
+-   the range for connecting the lines
+-   dark layer over the canvas
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   nothing
