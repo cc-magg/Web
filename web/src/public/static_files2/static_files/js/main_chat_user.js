@@ -3,6 +3,7 @@ const userId = Math.random() * (10 - 1) + 1
 // const userId = 'someUser2'
 const room = 'someUser2'
 let users = []
+var newInterval = null
 
 // Aqui ponemos jquery para no tener que usar react
 $(function () {
@@ -22,8 +23,16 @@ $(function () {
   let oldMinuteLoaded_LastMessage = null // minuto del ultimo mensaje cargado a inicio de pag
   let lastMinute = null // minuto del ultimo mensaje
 
+  console.log('Connecting to the server+')
+  newInterval = setInterval(intervalo2, 1000)
+  let roomConnection = {
+    userId,
+    room,
+    loadOldMessage: true
+  }
+
   // EVENTS
-  socket.emit('new user', userId)
+  //socket.emit('new user', userId)
 
   socket.on('load users', function (users) {
     $usersList.empty()
@@ -35,12 +44,13 @@ $(function () {
       $usersList.append(`<p>${users[i]}</p>`)}
     }
   })
-  
-  const roomConnection = {
+
+  /*const roomConnection = {
     userId,
-    room
+    room,
+    loadOldMessage: true
   }
-  socket.emit('join room', roomConnection) // creamos nuestra room y nos agregamos a ella
+  socket.emit('join room', roomConnection) // creamos nuestra room y nos agregamos a ella*/
   //socket.emit('load room', roomLoadMessages)
   socket.on('new room message', function (payload) { // recibimos mensajes de nuestra habitacion
     console.log('nuevo mensaje en el canal: '+payload.message)
@@ -52,6 +62,7 @@ $(function () {
     const to = payload.to
     console.log('new message to:'+to)
     if (to === String(userId)) { // verificamos que la recarga de mensjaes anteriores que mando el servidor la haya pedido este cliente
+      $chat.empty()
       let day = null
       for (let i = 0; i < messages.length; i++) {
         const message_date = messages[i].created_at
@@ -99,14 +110,17 @@ $(function () {
   })
 
   // recibe nuevo usuario conectado
-  socket.on('new user connected', function (newUserId) {
-    console.log(`new user connected: ${newUserId}`)
-    if (userId === newUserId) {
-      $usersList.append(`<p>My id: ${userId}</p>`)
-    } else {
-      users.push(userId)
-      $usersList.append(`<p>${newUserId}</p>`)
-    }
+  socket.on('new user connected', function (usersListArray) {
+    $usersList.empty()
+    users = usersListArray
+    $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
+    usersListArray.forEach( function (user) {
+      if (userId === user) {
+        $usersList.append(`<p>My id: ${userId}</p>`)
+      } else {
+        $usersList.append(`<p>${user}</p>`)
+      }
+    })
   })
 
   // enviando mensaje
@@ -248,7 +262,9 @@ $(function () {
   })
 
   // recive lista con los usuarios renovada
-  socket.on('user disconnected', function (users) {
+  socket.on('user list update', function (payload) {
+    // actualizamos la lista de usuarios
+    users = payload.users
     $usersList.empty()
     $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
     for( let i = 0; i < users.length; i++) {
@@ -256,6 +272,29 @@ $(function () {
         $usersList.append(`<p>My id: ${users[i]}</p>`)
       } else{
       $usersList.append(`<p>${users[i]}</p>`)}
+    }
+  })
+
+  function intervalo2 () {
+    socket.emit('custom ping', userId)
+  }
+  socket.on('reconnect', function (number) { // (evento de socket.io o socket mas info aqui: https://stackoverflow.com/questions/24224287/list-of-socket-io-events) por si se apaga el servidor y un usuario ya tenia un chat abierto, que no tenga que actualizar la vista cuando vuelva el servidor para seguir chateando
+    console.log('Reconnected+'+number)
+    newInterval = setInterval(intervalo2, 1000)
+  })
+  socket.on('custom pong', function (to) {
+    if (to === userId) {
+      console.log('The server is listening the events!')
+      clearInterval(newInterval)
+      users = []
+      roomConnection = {
+        userId,
+        room,
+        loadOldMessage: true
+      }
+      socket.emit('new user', userId)
+  
+      socket.emit('join room', roomConnection)
     }
   })
 })

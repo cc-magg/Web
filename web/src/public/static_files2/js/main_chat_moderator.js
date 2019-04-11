@@ -1,11 +1,11 @@
 'use strict'
 let userId = Math.random() * (10 - 1) + 1
 let users = []
+var newInterval = null
 
 // Aqui ponemos jquery para no tener que usar react
 $(function () {
-  const socket = io() // IO is defined on the html
-
+  let socket = io() // IO is defined on the html
   console.log('id....' + userId)
 
   // obtenemos DOM elements de la interface
@@ -15,21 +15,30 @@ $(function () {
   const $usersList = $('#usersList')
   const $roomsList = $('#roomsList')
   const $moreMessages = $('#moreMessages')
+  const $betweenModerators = $('#betweenModerators')
   console.log(`My Id is: ${userId}`)
   let oldIdLoaded_FirstMessage = null
   let oldMinuteLoaded_FirstMessage = null
   let oldMinuteLoaded_LastMessage = null // minuto del ultimo mensaje cargado a inicio de pag
   let lastMinute = null // minuto del ultimo mensaje
   let rooms = []
-  let roomsConnected = []
-  const moderatorRoom = `moderator ${userId}`
+  const moderatorRoom = `moderator_macasu2.`
   userId = `moderator ${userId}`
 
+  console.log('Connecting to the server+')
+  newInterval = setInterval(intervalo2, 1000)
+
+  let roomConnection = {
+    userId,
+    room: moderatorRoom,
+    loadOldMessage: true
+  }
+  /*
   // EVENTS
   socket.emit('new user', userId)
 
   /* ROOMS EVENTS */
-  let roomConnection = {
+  /*let roomConnection = {
     userId,
     room: moderatorRoom,
     loadOldMessage: true
@@ -40,123 +49,107 @@ $(function () {
     users: [userId]
   }
   rooms.push(newUserToRoom) // guardamos la habitacion que acabamos de crear en la lista de habitaciones
-
-  socket.emit('get rooms', moderatorRoom) // pedimos las habitaaciones que ya estaban creadas (junto con sus usuarios) antes de conectarnos
+  let getOldRooms = {
+    toUser: userId,
+    toRoom: moderatorRoom
+  }
+  socket.emit('get rooms', getOldRooms) // pedimos las habitaaciones que ya estaban creadas (junto con sus usuarios) antes de conectarnos*/
   socket.on('old rooms', function (oldRooms) { // 1) guardamos su room junto con su usuario y 2) nos subscrimos a su room
-    oldRooms.forEach(function (lookedRoom) {
-      const oldUsers = lookedRoom.users
-      lookedRoom = lookedRoom.room
-      let alreadyExists = false
-      for (const iterator of rooms) {
-        if (iterator.room === lookedRoom) {
-          alreadyExists = true
-        }
-      }
-      if (alreadyExists == false) { // si no existe en nuestra lista, procedemos a agregar el room a nuestra lista y nos suscribimos a e¡dicha room
-        newUserToRoom = {
-          room: lookedRoom,
-          users: []
-        }
-        oldUsers.forEach(function (user) {
-          newUserToRoom.users.push(user)
-        })
-        rooms.push(newUserToRoom)
+    if (oldRooms.toUser === userId) {
+      oldRooms = oldRooms.rooms
+      oldRooms.forEach(function (lookedRoom) {
+        lookedRoom = lookedRoom.room
+        const roomModerators = new RegExp('-', 'i')
         roomConnection = {
-          userId: moderatorRoom,
+          userId,
           room: lookedRoom,
           loadOldMessage: true
         }
-        socket.emit('join room', roomConnection)
-      }
-    })
-    console.log('old rooms: '+JSON.stringify(rooms))
-  })
-
-  socket.on('new room', function (payload) { // cuando un usuario se conecta: 1) guardamos su room 2) nos subscribimos a su room
-    const { room, user, message } = payload
-    let roomAlreadyExists = false
-    let roomIndex = null
-    for (let i = 0; i < rooms.length; i++) {
-      if (rooms[i].room === room) {
-        roomAlreadyExists = true
-        roomIndex = i
-        break
-      }
-    }
-    if (roomAlreadyExists == false) { // si no existe en nuestra lista, procedemos a agregar el room a nuestra lista y nos suscribimos a dicha room
-      newUserToRoom = {
-        room,
-        users: []
-      }
-      newUserToRoom.users.push(user)
-      rooms.push(newUserToRoom)
-    } else if (roomAlreadyExists == true) {
-      let userAlreadyExists = false
-      rooms[roomIndex].users.forEach(function (lookedUser) {
-        if (lookedUser === user) {
-          userAlreadyExists = true
+        if (!lookedRoom.match(/moderator/)) {
+          console.log('ENTRO A PEDIR JOIN ROOOM!1 desde old rooms--'+JSON.stringify(lookedRoom))
+          socket.emit('join room', roomConnection)
+        } else if (lookedRoom.match(roomModerators)) { // si es una room de moderadores
+          let usersOfRoom = lookedRoom.split('-')
+          let thisModeratorExistsOnThisRoom = false
+          usersOfRoom.forEach(function (userModerator) {
+            if (userModerator === moderatorRoom) {
+              thisModeratorExistsOnThisRoom = true
+            }
+          })
+          if (thisModeratorExistsOnThisRoom == true) {
+            console.log('ENTRO A PEDIR JOIN ROOOM!2 desde old rooms--'+JSON.stringify(lookedRoom))
+            socket.emit('join room', roomConnection)
+          }
         }
       })
-      if (userAlreadyExists == false) {
-        rooms[roomIndex].users.push(user)
-      }
     }
+    // actualizamos la lista rooms de moderadores
+    updateList()
+  })
+
+  socket.on('new room', function (payload) { // cuando un usuario se conecta: 1) verificamos: si es una rooms moderators y esta nuestra cuenta en ella, agregamos esta sesion 2) actualizamos la rooms lists
+    rooms = payload.rooms
+    const room = rooms[payload.roomIndex].room
+    // Procedemos a verificar si yo (esta sesion de moderador) ya existe en la room que se creo/actualizo
     let alreadysubscribedOnRoom = false
-    for (const iterator of rooms) {
-      if (iterator.room == room) {
+    rooms[payload.roomIndex].users.forEach(function (userIteractor) {
+      if (userIteractor == userId) {
         alreadysubscribedOnRoom = true
       }
-    }
-    if (alreadysubscribedOnRoom == false) {
-      roomsConnected.push(room)
+    })
+    if (alreadysubscribedOnRoom == false) { // si esta sesion de moderador no existe en la room que se creo/actualizo procedemos a verificar si debemos subscribirnos
+      const roomModerators = new RegExp('-', 'i')
       roomConnection = {
-        userId: moderatorRoom,
+        userId,
         room,
         loadOldMessage: true
       }
-      socket.emit('join room', roomConnection)
-    } else {
-      roomConnection = {
-        userId: moderatorRoom,
-        room,
-        loadOldMessage: false
+      if (!room.match(/moderator/)) { // si no es una room de moderador (osea si es una room de usuario) procedemos a subscribirnos
+        console.log('ENTRO A PEDIR JOIN ROOOM!1--'+JSON.stringify(room))
+        socket.emit('join room', roomConnection)
+      } else if (room.match(roomModerators)) { // si mi room esta en  la nueva sala de moderadores me subscribo
+        let usersOfRoom = room.split('-')
+        let thisModeratorExistsOnThisRoom = false
+        usersOfRoom.forEach(function (userModerator) {
+          if (userModerator === moderatorRoom) {
+            thisModeratorExistsOnThisRoom = true
+          }
+        })
+        if (thisModeratorExistsOnThisRoom == true) {
+          console.log('ENTRO A PEDIR JOIN ROOOM!2--'+JSON.stringify(room))
+          socket.emit('join room', roomConnection)
+        }
       }
-      socket.emit('join room', roomConnection)
     }
+    updateList()
   })
   socket.on('new room message', function (payload) { // 1) actualizamos su room agregandole agregando el nuevo user 2) actualizamos la Room list
-    const {room, user, message} = payload
-    console.log('nuevo mensaje en el canal: '+message)
-    let roomIndex = null
-    for (let i = 0; i < rooms.length; i++) {
-      if (rooms[i].room === room) {
-        roomIndex = i
-        break
-      }
-    }
-    let userAlreadyExists = false
-    rooms[roomIndex].users.forEach(function (lookedUser) {
-      if (lookedUser === user) {
-        userAlreadyExists = true
-      }
-    })
-    if (userAlreadyExists == false) {
-      rooms[roomIndex].users.push(user)
-    }
+    console.log('nuevo mensaje en el canal: '+payload.message)
+    rooms = payload.rooms
+    updateList()
+  })
+  const updateList = function () {
     /* ACTUALIZAMOS LA LISTA DE ROOMS */
     $roomsList.empty()
     $roomsList.append('<h1 class="usersListHeader">Rooms</h1>')
-    for (const iterator of rooms) {
-      $roomsList.append(`<p><span style="text-align: left; font-weight: 700; font-size: 20px;">Room: </span>${iterator.room}</p><p style="text-align: left; font-weight: 700; font-size: 20px;">users:</p>`)
-      iterator.users.forEach(function (userID) {
-        if (userID === userId) {
-          $roomsList.append(`<p style="text-align: left;">Me: ${userID}</p>`)
-        } else {
-          $roomsList.append(`<p style="text-align: left;">${userID}</p>`)
-        }
-      })
+    for ( let i = 0; i < rooms.length; i++) {
+      const newreg = RegExp('-', 'i')
+      if (!rooms[i].room.match(newreg) && rooms[i].users.length === 0) { // si es una cuenta(room) de usuario o moderador y no hay ninguna sesion
+        $roomsList.append(`<p><span style="text-align: left; font-weight: 700; font-size: 20px;">Room: </span>${rooms[i].room}</p><p style="text-align: left; font-weight: 700; font-size: 20px;">Offline</p>`)
+      } else if (rooms[i].room.match(newreg) && rooms[i].users.length === 0) { // si es una room de moderators y no hay ninguna sesion online
+        $roomsList.append(`<p><span style="text-align: left; font-weight: 700; font-size: 20px;">Room: </span>${rooms[i].room}</p><p style="text-align: left; font-weight: 700; font-size: 20px;">Users: Offline</p>`)
+      } else { // si existen sesiones
+        $roomsList.append(`<p><span style="text-align: left; font-weight: 700; font-size: 20px;">Room: </span>${rooms[i].room}</p><p style="text-align: left; font-weight: 700; font-size: 20px;">Users:</p>`)
+        rooms[i].users.forEach(function (userID) {
+          if (userID === userId) {
+            $roomsList.append(`<p style="text-align: left;">Me: ${userID}</p>`)
+          } else {
+            $roomsList.append(`<p style="text-align: left;">${userID}</p>`)
+          }
+        })
+      }
     }
-  })
+  }
   /*///////////////////////////////////////////////////////////*/
 
   // cargamos los usuarios que ya estaban conectados
@@ -175,8 +168,8 @@ $(function () {
   socket.on('load old messages', function (payload) {
     const messages = payload.roomMessages
     const to = payload.to
-    console.log('new message to:'+to+'---'+typeof(to))
     if (to === String(userId)) { // verificamos que la recarga de mensjaes anteriores que mando el servidor la haya pedido este cliente
+      $chat.empty()
       let day = null
       for (let i = 0; i < messages.length; i++) {
         const message_date = messages[i].created_at
@@ -228,14 +221,17 @@ $(function () {
   })
 
   // recibe nuevo usuario conectado
-  socket.on('new user connected', function (newUserId) {
-    console.log(`new user connected: ${newUserId}`)
-    if (userId === newUserId) {
-      $usersList.append(`<p>My id: ${userId}</p>`)
-    } else {
-      users.push(userId)
-      $usersList.append(`<p>${newUserId}</p>`)
-    }
+  socket.on('new user connected', function (usersListArray) {
+    $usersList.empty()
+    users = usersListArray
+    $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
+    usersListArray.forEach( function (user) {
+      if (userId === user) {
+        $usersList.append(`<p>My id: ${userId}</p>`)
+      } else {
+        $usersList.append(`<p>${user}</p>`)
+      }
+    })
   })
 
   // enviando mensaje
@@ -269,7 +265,7 @@ $(function () {
     } else {
       console.log('enviando datos')
       data = {
-        from: userId,
+        from: moderatorRoom,
         message: `${$messageBox.val()}`,
         room: 'All'
       }
@@ -339,13 +335,75 @@ $(function () {
   }
 
   $moreMessages.click(function () {
+    // separamos las rooms a las que estamos subscritos
+    /*let subscribedRooms = []
+    for (const iterator of rooms) {
+      iterator.users.forEach((user) => {
+        if (user === userId) {
+          subscribedRooms.push(iterator.room)
+        }
+      })
+    }*/
     console.log('asked for new messages?')
     const data = {
       messageId: oldIdLoaded_FirstMessage,
       userId,
-      room: rooms
+      room: moderatorRoom
     }
     socket.emit('ChargeMoreMessages', data)
+  })
+  $betweenModerators.click(function () {
+    console.log('asked for new room between moderators?')
+    let moderatorsRoomAlreadyExists = false
+    let howManyOtherRoomsExists = 0
+    let newRoom = `${moderatorRoom}`
+    for (const iterator of rooms) {
+      // verifico si existen mas salas de otros moderadores para poder unirlas
+      const numberOfModerators = new RegExp ('-', 'g')
+      if (iterator.room !== moderatorRoom && iterator.room.match(/moderator/) && iterator.room.match(numberOfModerators) === null) {
+        newRoom += `-${iterator.room}`
+        howManyOtherRoomsExists++
+      }
+    }
+    if (howManyOtherRoomsExists > 0) {
+      for (const iterator of rooms) {
+        let firstModeratorSame = false
+        let secondModeratorSame = false
+        // verifico si no existe ya una sala con los moderadores creada
+        const numberOfModerators = new RegExp ('-', 'g')
+        if (iterator.room.match(numberOfModerators)) { // si encuentra que es una room de moderadores
+          if (iterator.room.match(numberOfModerators).length === 1) { // si la room entre moderadores es de 2
+            const moderators = iterator.room.split('-')
+            moderators.forEach(function (roomUser) {
+              if (roomUser === moderatorRoom) {
+                firstModeratorSame = true
+              } else if (roomUser === 'moderator_macasu.') { // normalmente el moderador 2 debe ser enviado al presionar el boton "Hablar a X moderador", entonces moderador X seria 'moderator_macasu2.'
+                secondModeratorSame = true
+              }
+            })
+          }
+        }
+        if (firstModeratorSame == true && secondModeratorSame == true) { // si ya existe una moderator room entre los dos moderatos
+          moderatorsRoomAlreadyExists = true
+          console.log('There is another room with the same 2 users already existing')
+        }
+      }
+      if (moderatorsRoomAlreadyExists == false) {
+        const roomConnection = {
+          userId,
+          room: newRoom,
+          loadOldMessage: false
+        }
+        socket.emit('join room', roomConnection) // creamos la room: moderator userId y nos unimos a ella
+        let newUserToRoom = {
+          room: newRoom, 
+          users: [userId]
+        }
+        rooms.push(newUserToRoom) // guardamos la habitacion que acabamos de crear en la lista de habitaciones
+      }       
+    } else {
+      console.log('there are not enough moderator rooms')
+    }
   })
 
   // cargamos mensajes viejos
@@ -396,7 +454,12 @@ $(function () {
   })
 
   // recive lista con los usuarios renovada
-  socket.on('user disconnected', function (users) {
+  socket.on('user-moderator disconnected', function (payload) {
+    rooms = payload.list
+    // actualizamos la lista de usuarios y moderadores
+    console.log('users:-----'+users+'--'+payload.users)
+    users = payload.users
+    console.log('users:-----'+users+'--'+payload.users)
     $usersList.empty()
     $usersList.append('<h1 class="usersListHeader">Users Online</h1>')
     for( let i = 0; i < users.length; i++) {
@@ -404,6 +467,44 @@ $(function () {
         $usersList.append(`<p>My id: ${users[i]}</p>`)
       } else{
       $usersList.append(`<p>${users[i]}</p>`)}
+    }
+    // actualizamos la lista rooms de moderadores
+    updateList()
+  })
+
+  function intervalo2 () {
+    socket.emit('custom ping', userId)
+  }
+
+  socket.on('reconnect', function (number) { // (evento de socket.io o socket mas info aqui: https://stackoverflow.com/questions/24224287/list-of-socket-io-events) por si se apaga el servidor y un usuario ya tenia un chat abierto, que no tenga que actualizar la vista cuando vuelva el servidor para seguir chateando
+    console.log('Reconnected+'+number)
+    newInterval = setInterval(intervalo2, 1000)
+  })
+  socket.on('custom pong', function (to) {
+    if (to === userId) {
+      console.log('The server is listening the events!')
+      clearInterval(newInterval)
+      rooms = []
+      users = []
+      roomConnection = {
+        userId,
+        room: moderatorRoom,
+        loadOldMessage: true
+      }
+      let newUserToRoom = {
+        room: moderatorRoom, 
+        users: [userId]
+      }
+      let getOldRooms = {
+        toUser: userId,
+        toRoom: moderatorRoom
+      }
+      rooms.push(newUserToRoom) // guardamos la habitacion que acabamos de crear en la lista de habitaciones
+      socket.emit('new user', userId)
+  
+      socket.emit('join room', roomConnection)
+  
+      socket.emit('get rooms', getOldRooms)
     }
   })
 })

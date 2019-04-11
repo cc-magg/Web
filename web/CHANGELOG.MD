@@ -1,5 +1,39 @@
 # WEB - changelog
 
+## [v0.1.0] 2019-04-11
+
+### Added
+
+-   view 'chat_moderator2', is the same as the view 'chat_moderator' but with another room name.
+-   the server now can be restarted and the clients doesn't need to reload the view, they only need to reload the view when a change in the client code it's done.
+-   view 'chat_moderator' and 'chat_moderator2' now every time they join to a room, the chat get reseted to load the meesages with the new room.
+
+### Changed
+
+-   view 'chat_moderator' now have the commands:
+      - /w <userId> <message>
+            - The moderator can wisper somebody and it will not gonna be save.
+      - /R <room> <message>
+            - The moderator can talk to: another moderator, to an user, to himself.
+      - <message>
+            - this way the moderator can speak to all.
+-   view 'chat' now have the commands:
+      - /w <userId> <message>
+            - The moderator can wisper somebody and it will not gonna be save.
+      - <message>
+            - this way the user can talk to a moderator so the moderator answer the question that the user have.
+    And now all the session belongs to 'someUser2' room.
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   api ~0.0.2
+-   mongoDB
+
+
 ## [v0.0.8] 2019-04-1
 
 ### Added
