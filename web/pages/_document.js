@@ -18,10 +18,11 @@ export default class MyDocument extends Document {
           <meta name="theme-color" content="#353590" />
           <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossOrigin="anonymous"></script>
           <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossOrigin="anonymous"></link>
+          <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i|Sorts+Mill+Goudy:400,400i" rel="stylesheet"></link>
           <link rel="manifest" href="/static/manifest.json"></link>
           <style>{`body { margin: 0 } /* custom! */`}</style>
         </Head>
-        <body className="custom_class">
+        <body className="custom_class"  data-spy="scroll" data-target=".track" data-offset="56">
           <Main />
           <NextScript />
           <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossOrigin="anonymous"></script>

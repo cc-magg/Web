@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export default () => {
+export default props => {
     const canvasRef = useRef(null);
     let mouse = {
         x: undefined,
@@ -13,7 +13,6 @@ export default () => {
         mouse.y = event.clientY - rect.top;
         //console.log(event);
     }
-
 
     useEffect(() => {
         let circleArray = [];
@@ -30,8 +29,8 @@ export default () => {
         const amountOfCircles = 200;
         const mouseRange = 200;
         const rangePerStar = 110;
-        let canvasWidth = window.innerWidth;
-        let canvasHeight = window.innerHeight;
+        const canvasWidth = window.innerWidth;
+        const canvasHeight = window.innerHeight-props.menuHeight;
 
         //window.addEventListener('resize', this.updateWindowDimensions);
         const canvas = canvasRef.current;

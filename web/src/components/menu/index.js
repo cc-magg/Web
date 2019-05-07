@@ -7,13 +7,16 @@ import React, { useState } from 'react';
  * https://reactjs.org/docs/hooks-effect.html
  */
 
-export default () => {
+export default props => {
     const [count, setCount] = useState(0);
+    const defaultBackgroundColor = '#353590';
+    const handleCountChange = () => { setCount(count + 1); }
 
-    const handleCountChange = () => {setCount(count + 1);}
-    
+    const menuType = (props.menuType == undefined || props.menuType == '' || props.menuType == 'static') ? 'static' : (props.menuType != 'transparent') ? 'fixed' : 'transparent';
+    const menuBackgroundColor = (props.menuBackgroundColor == undefined || props.menuBackgroundColor == '') ? defaultBackgroundColor : props.menuBackgroundColor;
+
     return <div>
-        <nav className="navbar navbar-expand-lg navbar-dark">
+        <nav className={`navbar navbar-expand-lg navbar-dark ${menuType}`}>
             <a className="navbar-brand" href="#">MAGG {`Home clicked ${count} times`}</a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -36,7 +39,23 @@ export default () => {
         <style jsx>
             {`
                 nav {
-                    background-color: #353590;
+                    background-color: ${menuBackgroundColor};
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    z-index: 2;
+                }
+                .transparent {
+                    background-color: ${menuBackgroundColor}0f;
+                    position: absolute;
+                    
+                }
+                .fixed {
+                    position: fixed;
+                    -webkit-transition: background-color .5s;
+                    -moz-transition: background-color .5s;
+                    -o-transition: background-color .5s;
+                    transition: background-color .5s;
                 }
             `}
         </style>
