@@ -140,3 +140,22 @@
 ### Compatibility (for it to works well)
 
 -   nothing
+
+## [v0.1.5] 2019-05-20
+
+### Added
+
+-   some images for the home
+
+### Changed
+
+-   home - responsive desktop
+-   page theme color in manifest
+
+### Deleted
+
+-   nothing
+
+### Compatibility (for it to works well)
+
+-   nothing

@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 import Menu from '../../../components/menu';
+import Footer from '../../../components/footer';
 import CanvasHeader from './canvas';
 import Spinner from '../../../components/spinner';
 import ServicesCard from './servicesCardContainer';
 import Services_web_development from './Services_web_development';
 import Some_proJects from './some_proJects';
+import Features from './features';
+import Technologies from './technologies';
 
 export default props => {
     //WEB COLORS
@@ -98,7 +101,7 @@ export default props => {
                 </ServicesCard>
             </div>
 
-            {/*services 1*/}
+            {/*services*/}
             <div className="container-fluid">
                 <div className="row vertical-align">
                     <div id="columnLeft1" className="col-3 borderLight" style={{ height: windowHeight - menuHeight, backgroundColor: 'white', position: 'sticky', top: menuHeight }}>
@@ -119,12 +122,6 @@ export default props => {
                                         <div className="col-md-auto">
                                             <a className="list-group-item col text-center padding5" href="#c">SEO</a>
                                         </div>
-
-                                        {/*<a className="list-group-item col text-center noPadding" href="#a"><img src="/static/wordpress_icon_menu_gray.png" className="imageLeftMenu" /></a>
-                                        <a className="list-group-item col text-center noPadding" href="#b"><img src="/static/wordpress_icon_menu.png" className="imageLeftMenu" /></a>
-                                        <a className="list-group-item col text-center noPadding" href="#c"><img src="/static/wordpress_icon_menu_gray.png" className="imageLeftMenu" /></a>
-                                        <a className="list-group-item col text-center noPadding" href="#d"><img src="/static/wordpress_icon_menu_gray.png" className="imageLeftMenu" /></a>
-                                        <a className="list-group-item col text-center noPadding" href="#e"><img src="/static/wordpress_icon_menu_gray.png" className="imageLeftMenu" /></a>*/}
                                     </div>
                                     <div className="row justify-content-md-center" style={{ padding: 5 }}>
                                         <div className="col-md-auto">
@@ -134,9 +131,6 @@ export default props => {
                                             <a className="list-group-item col text-center padding5" href="#e">3d architecture</a>
                                         </div>
                                     </div>
-                                    {/*<a className="list-group-item" href="#a">web app</a>
-                                    <a className="list-group-item" href="#b">wordpress</a>
-                                    <a className="list-group-item" href="#c">SEO</a>*/}
                                 </div>
                             </div>
                         </div>
@@ -151,16 +145,23 @@ export default props => {
             {/*some projects*/}
             <Some_proJects />
 
-            <p>{props.data}</p>
+            {/*parallax effect / features*/}
+            <Features />
+
+            {/*technologies*/}
+            <Technologies />
+
+            <Footer />
+
+
+            {/*<p>{props.data}</p>
             <button type="button" className="btn btn-primary" onClick={() => props.sendMessage('mensaje nuevo')}>agregar dato</button><br />
-            <Link href="/contact">
-                <a>ir a contact</a>
-            </Link>
             <Spinner
                 type={'spinner-grow'}
                 color={'blue'}
                 align={'text-center'}
-            />
+/>*/}
+            
         </div>
 
         <style jsx>{`
@@ -225,10 +226,7 @@ export default props => {
             .whoWeAreText {
                 font-size: 0.8rem;
             }
-            .noPadding {
-                padding-right:0;
-                padding-left:0;
-            }
+            
             .nav {
                 color: ${c7};
             }
@@ -295,6 +293,10 @@ export default props => {
                 font-family: 'Sorts Mill Goudy';
                 font-style: italic;
                 font-size: 25px;
+            }
+            .noPadding {
+                padding-right:0;
+                padding-left:0;
             }
         `}</style>
     </div>

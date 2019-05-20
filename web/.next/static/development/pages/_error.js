@@ -2187,7 +2187,7 @@ function (_React$Component) {
 
 /***/ }),
 
-/***/ 2:
+/***/ 1:
 /*!********************************************************************************************************************************************************************!*\
   !*** multi next-client-pages-loader?page=%2F_error&absolutePagePath=D%3A%5Cwamp64%5Cwww%5CGITS-proyectos%5Cdevelopment%5Cweb%5CfrontEND%5Cweb%5Cpages%5C_error.js ***!
   \********************************************************************************************************************************************************************/
@@ -2210,5 +2210,5 @@ module.exports = dll_55dc4e2ecf7824085104;
 
 /***/ })
 
-},[[2,"static/runtime/webpack.js"]]]));;
+},[[1,"static/runtime/webpack.js"]]]));;
 //# sourceMappingURL=_error.js.map

@@ -14,8 +14,8 @@ export default props => {
 
         <style jsx>{`
         .card {
+            width: 250px;
             margin: 0 auto;
-            width: 180px;
             border: 0;
             box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
             transition: 0.3s;
@@ -40,6 +40,25 @@ export default props => {
             background-color: ${props.buttonColor};
             border-color: ${props.buttonColor};
             font-size: 0.8rem;
+        }
+
+        // Small devices (landscape phones, 576px and up)
+        @media (min-width: 576px) {
+        }
+        
+        // Medium devices (tablets, 768px and up)
+        @media (min-width: 768px) {
+            .card {
+                width: 180px;
+            }
+        }
+        
+        // Large devices (desktops, 992px and up)
+        @media (min-width: 992px) {
+        }
+        
+        // Extra large devices (large desktops, 1200px and up)
+        @media (min-width: 1200px) {
         }
         `}</style>
     </div>
